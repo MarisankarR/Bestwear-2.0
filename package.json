@@ -1,5 +1,7 @@
 {
-  "dependencies": {
-    "mongodb": "^7.4.0"
-  }
+  "private": true,
+  "workspaces": [
+    "backend",
+    "BESTWEAR"
+  ]
 }

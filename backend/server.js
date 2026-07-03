@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
+import serverless from 'serverless-http'
 import connectDB from './config/mongodb.js'
 import connectCloudinary from './config/cloudinary.js'
 import userRouter from './routes/userRoute.js'
@@ -38,4 +39,4 @@ if (process.env.NODE_ENV !== 'production') {
     )
 }
 
-export default app
+export default serverless(app)
