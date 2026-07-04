@@ -6,8 +6,8 @@ import Stripe from 'stripe'
 const currency = 'inr'
 const deliveryCharge = 10
 
-//geteway initialize 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+//gateway initialize 
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 
 //Placing orders using COD Method 
@@ -83,6 +83,10 @@ const placeOrderStripe = async (req,res) => {
             quantity:1
          })
 
+         if (!stripe) {
+             return res.json({success:false, message:"Stripe payment gateway is not configured on the server."})
+         }
+
          const session = await stripe.checkout.sessions.create({
             success_url: `${origin}/verify?success=true&orderId&paymentMethod=stripe=${newOrder._id}`,
             cancel_url:  `${origin}/verify?success=false&orderId=${newOrder._id}`,
@@ -123,84 +127,30 @@ const verifyStripe = async (req,res) => {
 
 //Placing orders using Razorpay Method 
 const placeOrderRazorpay = async (req,res) => {
-   
-}
-//Placing orders using Google Method
-const placeOrderGoogle =async (req,res) =>{
- try {
-        const { userId, items, amount, address} = req.body;
-        const {origin} = req.headers
-
-         const orderData = {
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod:'google',
-            payment:true,
-            date: Date.now()
-        }
-
-         const newOrder = new orderModel(orderData)
-         await newOrder.save()
-
-         const line_items = items.map((item) => ({
-            price_data:{
-                currency:currency,
-                product_data: {
-                    name:item.name
-                },
-                unit_amount: item.price *100
-            },
-            quantity:item.quantity
-         }))
-         line_items.push ({
-                price_data:{
-                currency:currency,
-                product_data: {
-                    name:'Delivery Charges'
-                },
-                unit_amount: deliveryCharge * 100
-            },
-            quantity:1
-         })
-
-         const session = await google.checkout.sessions.create({
-            success_url: `${origin}/verify?success=true&orderId&paymentMethod=google=${newOrder._id}`,
-            cancel_url:  `${origin}/verify?success=false&orderId=${newOrder._id}`,
-            line_items,
-            mode:'payment',
-
-         })
-
-         res.json({success:true,session_url:session.url})
-
-
+    try {
+        res.json({success:false, message:"Razorpay payment method is not implemented yet"})
     } catch (error) {
         console.log(error);
         res.json({success: false, message:error.message})
     }
-
+}
+//Placing orders using Google Method
+const placeOrderGoogle = async (req,res) =>{
+    try {
+        res.json({success:false, message:"Google Pay payment method is not implemented yet"})
+    } catch (error) {
+        console.log(error);
+        res.json({success: false, message:error.message})
+    }
 }
 //Verify Google
 const verifyGoogle = async (req,res) => {
-    const {orderId, success, userId} = req.body
-
-     try {
-        
-        if (success === "true") {
-            await orderModel.findByIdAndUpdate(orderId, {payment:true})
-            await userModel.findOneAndUpdate(userId,{cartData: {}})
-            res.json({success:true});
-            
-        }else {
-            await orderModel.findByIdAndUpdate(orderId)
-            res.json({success:false})
-        }
-     } catch (error) {
+    try {
+        res.json({success:false, message:"Google Pay payment verification is not implemented yet"})
+    } catch (error) {
         console.log(error);
         res.json({success: false, message:error.message})
-     }
+    }
 }
 
 
